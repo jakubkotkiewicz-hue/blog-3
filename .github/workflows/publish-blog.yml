@@ -2,8 +2,8 @@ name: Publikacja wpisu na blogu
 
 on:
   schedule:
-    - cron: "0 8 * * 1"
-  workflow_dispatch:
+    - cron: "0 8 * * 1"   # każdy poniedziałek 8:00 UTC
+  workflow_dispatch:        # pozwala uruchomić ręcznie z zakładki Actions
 
 permissions:
   contents: write
