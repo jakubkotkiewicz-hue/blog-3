@@ -1,0 +1,38 @@
+name: Publikacja wpisu na blogu
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"   # każdy poniedziałek 8:00 UTC
+  workflow_dispatch:        # pozwala uruchomić ręcznie z zakładki Actions
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Generuj i publikuj wpis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          AUTO_PUBLISH: ${{ vars.AUTO_PUBLISH }}
+        run: python generate_and_publish.py
+
+      - name: Zapisz zaktualizowaną listę tematów
+        run: |
+          git config user.name "blog-agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add topics.csv
+          git diff --staged --quiet || git commit -m "Oznacz temat jako opublikowany"
+          git push
